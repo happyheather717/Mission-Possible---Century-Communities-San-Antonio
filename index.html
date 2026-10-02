@@ -1,1 +1,374 @@
+<title>Mission Possible</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: dark purple scoreboard. Header panel with contest stats, month filter, grid of one card per subdivision listing homes by closing month. */
+:root{
+--bg:#24123f;--panel:#33205c;--panel2:#3d2870;--line:#4f3888;
+--fg:#f4eeff;--mute:#b9a8dc;
+--gold:#f5b82e;--teal:#3fd6c0;--lav:#9d7bff;--ink:#24123f;
+--display:'Barlow Condensed','Arial Narrow',Arial,sans-serif;
+--body:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
+color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.4;margin:0;padding-inline:16px;padding-block:24px 40px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.hd{background:var(--panel);border-top:4px solid var(--gold);border-radius:12px;padding:20px 22px;display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between}
+.eb{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin:0 0 4px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(38px,7vw,58px);line-height:1;margin:0 0 6px;text-transform:uppercase;letter-spacing:.01em;text-wrap:balance}
+.sub{color:var(--mute);margin:0 0 12px;max-width:52ch}
+.prize{display:inline-block;background:var(--gold);color:var(--ink);font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.03em;padding:6px 16px;border-radius:6px}
+.stats{display:flex;gap:12px;flex-wrap:wrap}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:8px 18px 8px 8px;display:flex;align-items:center;gap:10px}
+.ring{width:38px;height:38px;border-radius:50%;background:conic-gradient(var(--c) calc(var(--p)*1%),var(--line) 0);display:grid;place-items:center;flex:none}
+.ring::after{content:"";width:28px;height:28px;border-radius:50%;background:var(--panel2)}
+.stat b{font-family:var(--display);font-size:26px;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{color:var(--mute);font-size:13px}
+.bar{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center;justify-content:space-between}
+.legend{display:flex;gap:18px;flex-wrap:wrap;color:var(--mute);font-size:13px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+h2{font-family:var(--display);font-size:26px;text-transform:uppercase;letter-spacing:.02em;margin:0}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer}
+.pill{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:999px;padding:6px 16px;font-weight:600;font-size:13px}
+.pill:hover{border-color:var(--lav)}
+.pill[aria-pressed=true]{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+.pill:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;align-items:start}
+.card{background:var(--panel);border-radius:12px;border-top:3px solid var(--lav);padding:14px 14px 10px;min-width:0}
+.card h3{font-family:var(--display);font-size:22px;letter-spacing:.02em;text-transform:uppercase;margin:0;line-height:1.1}
+.cnt{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:2px 0 8px}
+ul{list-style:none;margin:0;padding:0}
+li{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line);min-width:0}
+.tag{flex:none;width:44px;text-align:center;background:var(--panel2);border:1px solid var(--line);border-radius:5px;font-size:11px;font-weight:600;letter-spacing:.04em;padding:2px 0}
+.tag.oct{border-color:var(--teal);color:var(--teal)}
+.tag.nov{border-color:var(--lav);color:#cdbcff}
+.tag.dec{border-color:var(--gold);color:var(--gold)}
+.addr{min-width:0;overflow-wrap:anywhere}
+li.sold{background:var(--gold);color:var(--ink);border-radius:6px;padding-inline:8px;margin-block:2px;border-top-color:transparent;font-weight:600}
+li.sold .addr{text-decoration:line-through}
+li.sold .tag{background:var(--ink);border-color:var(--ink);color:var(--gold)}
+.foot{color:var(--mute);font-size:12px}
+.section{margin-top:32px}
+.section h2{font-family:var(--display);font-size:24px;text-transform:uppercase;letter-spacing:.02em;margin:0 0 16px}
+.leaderboards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.lb{background:var(--panel);border-radius:12px;border-top:3px solid var(--lav);padding:16px}
+.lb h3{font-family:var(--display);font-size:18px;text-transform:uppercase;margin:0 0 12px;letter-spacing:.02em}
+.lb-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.lb-item:last-child{border-bottom:none}
+.rank{font-weight:700;color:var(--gold);font-size:16px;min-width:30px}
+.lb-name{flex:1;padding:0 12px;font-size:14px}
+.lb-value{font-weight:600;color:var(--teal);font-family:var(--display)}
+.recent{background:var(--panel);border-radius:12px;border-top:3px solid var(--teal);padding:16px}
+.recent h3{font-family:var(--display);font-size:18px;text-transform:uppercase;margin:0 0 12px;letter-spacing:.02em}
+.sale-item{padding:10px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.sale-item:last-child{border-bottom:none}
+.sale-address{flex:1;font-size:13px}
+.sale-agent{color:var(--mute);font-size:12px;margin-top:2px}
+.sale-date{color:var(--gold);font-weight:600;font-size:12px}
+.rules{background:var(--panel);border-radius:12px;border-top:3px solid var(--gold);padding:16px}
+.rules h3{font-family:var(--display);font-size:18px;text-transform:uppercase;margin:0 0 12px;letter-spacing:.02em}
+.rules-content{color:var(--mute);font-size:13px;line-height:1.6}
+.placeholder{color:var(--mute);font-style:italic;padding:20px;text-align:center}
+.company-wide{background:var(--panel);border-radius:12px;border-top:3px solid var(--teal);padding:16px}
+.company-wide h3{font-family:var(--display);font-size:18px;text-transform:uppercase;margin:0 0 12px;letter-spacing:.02em}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.stat-row:last-child{border-bottom:none}
+.stat-label{color:var(--mute);font-size:13px}
+.stat-value{font-weight:700;color:var(--gold);font-size:18px;font-family:var(--display)}
+.podium{display:flex;justify-content:center;align-items:flex-end;gap:20px;margin:20px 0}
+.podium-item{text-align:center;display:flex;flex-direction:column;align-items:center}
+.podium-rank{font-family:var(--display);font-size:48px;font-weight:800;color:var(--gold);line-height:1}
+.podium-name{margin-top:8px;font-size:14px;font-weight:600}
+.podium-medal{font-size:32px;margin:8px 0}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.team-item{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px;text-align:center}
+.team-item-name{font-weight:600;margin:0 0 4px;font-size:14px}
+.team-item-stat{color:var(--teal);font-weight:700;font-size:16px;font-family:var(--display)}
+@media (prefers-reduced-motion:no-preference){
+.card{transition:transform .15s}
+.card:hover{transform:translateY(-2px)}
+.agent-drop{animation:drop 3s ease-in-out 2s infinite}
+.rope{animation:rope-descend 3s ease-in-out 2s infinite}
+.sign{animation:sign-plant 3s ease-in-out 2s infinite}
+.smoke{animation:smoke-burst 3s ease-out 2s infinite}
+@keyframes drop{
+0%{transform:translateY(-80px);opacity:1}
+85%{transform:translateY(0);opacity:1}
+100%{transform:translateY(0);opacity:0}
+}
+@keyframes rope-descend{
+0%{transform:scaleY(0);transform-origin:top;opacity:0}
+10%{opacity:1}
+85%{opacity:1}
+100%{opacity:0}
+}
+@keyframes sign-plant{
+0%{transform:translateY(60px) rotate(45deg);opacity:0}
+50%{opacity:0}
+70%{transform:translateY(0) rotate(0deg);opacity:1}
+100%{transform:translateY(0) rotate(0deg);opacity:1}
+}
+@keyframes smoke-burst{
+0%{transform:scale(0);opacity:1}
+50%{opacity:1}
+100%{transform:scale(1.5);opacity:0}
+}
+}
+</style>
+<div class="wrap">
+ <header class="hd">
+  <div>
+   <p class="eb">Century Communities &middot; San Antonio &middot; Q4 2026</p>
+   <h1>Mission Possible</h1>
+   <p class="sub">Sales, construction and office staff. One scorecard for every qualifying home.</p>
+   <div style="margin-top:12px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;font-size:12px;line-height:1.6">
+     <div style="background:var(--panel2);border-left:3px solid var(--gold);padding:10px 12px;border-radius:4px">
+      <div style="font-weight:700;color:var(--gold);margin-bottom:4px">SALES BONUS</div>
+      <div>$300 per home when closed</div>
+      <div style="color:var(--teal);margin-top:4px">Community target met: +$200 per home you sold (includes cross-sells)</div>
+     </div>
+     <div style="background:var(--panel2);border-left:3px solid var(--lav);padding:10px 12px;border-radius:4px">
+      <div style="font-weight:700;color:var(--lav);margin-bottom:4px">CONSTRUCTION BONUS</div>
+      <div>$100 per home completed</div>
+      <div style="color:var(--teal);margin-top:4px">Community target met: +$100 per home</div>
+     </div>
+     <div style="background:var(--panel2);border-left:3px solid var(--mute);padding:10px 12px;border-radius:4px">
+      <div style="font-weight:700;color:var(--mute);margin-bottom:4px">ADMIN BONUS</div>
+      <div>4 PTO days</div>
+      <div style="color:var(--teal);margin-top:4px">Q4 sales target met</div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <div class="stats">
+   <div class="stat"><div class="ring" id="r1" style="--c:var(--gold);--p:0"></div><div><b id="days">0</b> <span>days left in the contest</span></div></div>
+   <div class="stat"><div class="ring" id="r2" style="--c:var(--teal);--p:100"></div><div><b id="left">0</b> <span>homes left to close</span></div></div>
+  </div>
+ </header>
+ <div class="legend" aria-label="Legend">
+  <span><i style="background:var(--teal)"></i>October close</span>
+  <span><i style="background:var(--lav)"></i>November close</span>
+  <span><i style="background:var(--gold)"></i>December close / marked sold</span>
+ </div>
+ <div class="bar">
+  <div style="display:flex;align-items:center;gap:16px">
+   <h2>Qualifying homes by community</h2>
+   <svg style="width:140px;height:140px;flex-shrink:0;pointer-events:none" viewBox="0 0 140 140">
+    <defs><filter id="glow2"><feGaussianBlur stdDeviation="1" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <!-- House -->
+    <rect x="40" y="70" width="60" height="50" fill="none" stroke="#9d7bff" stroke-width="2"/>
+    <polygon points="70,50 40,70 100,70" fill="none" stroke="#9d7bff" stroke-width="2"/>
+    <rect x="55" y="85" width="10" height="15" fill="none" stroke="#9d7bff" stroke-width="1.5"/>
+    <!-- Sold sign in front of house (bigger) -->
+    <rect x="45" y="60" width="26" height="36" fill="#f5b82e" rx="3" class="sign"/>
+    <text x="58" y="85" text-anchor="middle" font-size="12" fill="#24123f" font-weight="bold" class="sign">SOLD</text>
+    <!-- Smoke -->
+    <circle cx="58" cy="80" r="8" fill="#f5b82e" opacity="0.3" class="smoke"/>
+   </svg>
+  </div>
+  <div class="filters" role="group" aria-label="Filter by closing month" id="filters"></div>
+ </div>
+ <main class="grid" id="grid"></main>
+ <p class="foot">Target months come from the projected completion date on the 9/29/2026 HITS List. Homes marked sold show in gold with the address struck through.</p>
 
+ <section class="section">
+  <h2>Leaderboards</h2>
+  <div class="leaderboards">
+   <div class="lb">
+    <h3>Sales Leaderboard</h3>
+    <div style="font-size:11px;font-weight:600;display:grid;grid-template-columns:1.5fr 1.5fr 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);color:var(--mute)">
+     <div>Address | Community</div>
+     <div>Agent</div>
+     <div text-align:right>Date of Closing</div>
+    </div>
+    <div class="placeholder" style="padding:20px 0">Sales will appear as homes close</div>
+   </div>
+   <div class="lb">
+    <h3>Construction Leaderboard</h3>
+    <div style="font-size:11px;font-weight:600;display:grid;grid-template-columns:1.5fr 1.5fr 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);color:var(--mute)">
+     <div>Address | Community</div>
+     <div>Builder</div>
+     <div text-align:right>Date of Closing</div>
+    </div>
+    <div class="placeholder" style="padding:20px 0">Homes will appear as they complete</div>
+   </div>
+  </div>
+ </section>
+
+ <section class="section">
+  <h2>MVPs</h2>
+  <div class="leaderboards">
+   <div class="lb">
+    <h3>Sales MVPs</h3>
+    <div class="placeholder">MVPs will be determined as homes close</div>
+   </div>
+   <div class="lb">
+    <h3>Construction MVPs</h3>
+    <div class="placeholder">MVPs will be determined as homes complete</div>
+   </div>
+  </div>
+ </section>
+
+ <section class="section">
+  <h2>Company-Wide Sales</h2>
+  <div class="company-wide">
+   <h3>Sales Summary</h3>
+   <div class="stat-row"><span class="stat-label">Total Homes Closed</span><span class="stat-value">0</span></div>
+   <div class="stat-row"><span class="stat-label">Total Homes In Contest</span><span class="stat-value">111</span></div>
+   <div class="stat-row"><span class="stat-label">Homes Remaining</span><span class="stat-value">111</span></div>
+   <div class="stat-row"><span class="stat-label">Competition Leaders</span><span class="stat-value">—</span></div>
+  </div>
+ </section>
+
+ <section class="section">
+  <h2>On the Podium</h2>
+  <div class="company-wide">
+   <div class="placeholder" style="padding:40px 20px">Podium standings will appear as homes close during the contest</div>
+  </div>
+ </section>
+
+ <section class="section">
+  <h2>Community Scoreboard</h2>
+  <div class="company-wide">
+   <h3>Performance by Community</h3>
+   <div class="team-grid" id="community-board"></div>
+  </div>
+ </section>
+
+ <section class="section">
+  <h2>Recent Sales</h2>
+  <div class="recent">
+   <div class="placeholder">Sales will appear here as homes close</div>
+  </div>
+ </section>
+
+ <section class="section">
+  <h2>Contest Rules</h2>
+  <div class="rules">
+   <h3>Incentives & Eligibility</h3>
+   <div class="rules-content">
+    <div style="margin-bottom:16px">
+     <div style="font-weight:600;color:var(--gold);margin-bottom:6px">Sales Bonus</div>
+     <div>$300 per home when closed. Community target met: +$200 per home you sold (includes cross-sells)</div>
+    </div>
+    <div style="margin-bottom:16px">
+     <div style="font-weight:600;color:var(--lav);margin-bottom:6px">Construction Bonus</div>
+     <div>$100 per home completed. Community target met: +$100 per home</div>
+    </div>
+    <div style="margin-bottom:16px">
+     <div style="font-weight:600;color:var(--teal);margin-bottom:6px">Admin Bonus</div>
+     <div>4 PTO days when Q4 sales target is met</div>
+    </div>
+    <div style="border-top:1px solid var(--line);padding-top:12px;margin-top:12px">
+     <div style="font-weight:600;margin-bottom:6px">Eligibility Requirements</div>
+     <div style="margin-bottom:8px">• Homes must close in Q4 (October - December 2026) to qualify for bonuses</div>
+     <div style="margin-bottom:8px">• Cross-selling is allowed, but you only receive the extra bonus (if target is met) on homes YOU personally sold</div>
+     <div>• Bonuses paid in January 2027 (except base $300 sales bonus paid at closing)</div>
+    </div>
+   </div>
+  </div>
+ </section>
+</div>
+<script>
+const CMS={
+'Agave':'Gilbert Leal',
+'Applewhite Meadows':'Hector Hernandez',
+'Cinco Lakes':'Mariano Chavez',
+'Garden Grove II':'Tyler Novander',
+'Hacienda':'Gilbert Leal',
+'Hiddenbrooke':'Bruce Johnson',
+'Homestead':'Bruce Johnson',
+'Mesa Vista':'Hector Hernandez',
+'Park Place':'Jeff Davis',
+'Park Place II':'Jeff Davis',
+'Rosemont Hill':'Will Scott',
+'Rosemont Hill 25 NPL':'Will Scott',
+'Rosemont Hill 30 NPL':'Will Scott',
+'Senna':'Lorenzo Salgado',
+'Spring Creek':'Rolando Vargas',
+'Summerlin':'Roger Rosas'
+};
+const SALES={
+'Agave':['Ileana Mayen'],
+'Applewhite Meadows':['Brenda Herrera','Cludi Chapa'],
+'Cinco Lakes':['Juan Calderon','Anthony Luna'],
+'Garden Grove II':['Arleth Estrada','Jaime Rios'],
+'Hacienda':['Isaac Munoz','Abdiel Serrano'],
+'Hiddenbrooke':['Manijech Huereca'],
+'Mesa Vista':['Jose Ochoa','Paulina Pena'],
+'Park Place':['Jason Giuca','Kassidy Kowalski'],
+'Rosemont Hill':['Zaid Nawayseh','Claudia Ramos'],
+'Senna':['Enrique Cavazos Jr','Daniel Pena'],
+'Spring Creek':['Andres Martinez'],
+'Summerlin':['Cesario Gutierrez','Torey Bailey']
+};
+const DATA=[{"name":"Hacienda","homes":[{"a":"9934 Chavaneaux Lndg","m":"JUL","c":"7/10/2026","st":"Spec"},{"a":"9947 Chavaneaux Lndg","m":"AUG","c":"8/21/2026","st":"Spec"},{"a":"9946 Chavaneaux Lndg","m":"SEP","c":"9/10/2026","st":"Spec"},{"a":"9954 Chavaneaux Lndg","m":"SEP","c":"9/24/2026","st":"Spec"},{"a":"9962 Chavaneaux Lndg","m":"OCT","c":"10/23/2026","st":"Spec"},{"a":"9966 Chavaneaux Lndg","m":"NOV","c":"11/4/2026","st":"Spec"},{"a":"9970 Chavaneaux Lndg","m":"NOV","c":"11/9/2026","st":"Spec"},{"a":"9971 Chavaneaux Lndg","m":"NOV","c":"11/13/2026","st":"Spec"},{"a":"9967 Chavaneaux Lndg","m":"NOV","c":"11/17/2026","st":"Spec"},{"a":"9974 Chavaneaux Lndg","m":"NOV","c":"11/19/2026","st":"Spec"},{"a":"9982 Chavaneaux Lndg","m":"NOV","c":"11/24/2026","st":"Spec"},{"a":"9978 Chavaneaux Lndg","m":"NOV","c":"11/25/2026","st":"Spec"},{"a":"9983 Chavaneaux Lndg","m":"DEC","c":"12/1/2026","st":"Spec"},{"a":"9986 Chavaneaux Lndg","m":"DEC","c":"12/10/2026","st":"Spec"},{"a":"9987 Chavaneaux Lndg","m":"DEC","c":"12/10/2026","st":"Spec"}]},{"name":"Rosemont Hill 25 NPL","homes":[{"a":"9027 Summerwood Bend","m":"JUN","c":"6/19/2026","st":"Spec"},{"a":"10630 Rosemont Pass","m":"SEP","c":"9/14/2026","st":"Spec"},{"a":"10634 Rosemont Pass","m":"SEP","c":"9/14/2026","st":"Spec"},{"a":"10626 Rosemont Pass","m":"SEP","c":"9/15/2026","st":"Spec"},{"a":"10602 Rosemont Pass","m":"SEP","c":"9/29/2026","st":"Spec"},{"a":"10606 Rosemont Pass","m":"SEP","c":"9/29/2026","st":"Spec"},{"a":"10614 Rosemont Pass","m":"SEP","c":"9/29/2026","st":"Spec"},{"a":"10618 Rosemont Pass","m":"OCT","c":"10/7/2026","st":"Spec"},{"a":"10614 Rosemont Hill","m":"NOV","c":"11/6/2026","st":"Spec"},{"a":"10610 Rosemont Hill","m":"NOV","c":"11/9/2026","st":"Spec"},{"a":"10606 Rosemont Hill","m":"NOV","c":"11/11/2026","st":"Spec"},{"a":"10607 Eaglewood Bend","m":"NOV","c":"11/30/2026","st":"Spec"},{"a":"10610 Eaglewood Bend","m":"NOV","c":"11/30/2026","st":"Spec"},{"a":"10618 Rosemont Hill","m":"NOV","c":"11/30/2026","st":"Spec"}]},{"name":"Applewhite Meadows","homes":[{"a":"10822 Apple Pie Road","m":"JUN","c":"6/2/2026","st":"Spec"},{"a":"2326 Crisp Gln","m":"JUL","c":"7/16/2026","st":"Spec"},{"a":"2323 Crisp Gln","m":"AUG","c":"8/5/2026","st":"Spec"},{"a":"2331 Crisp Gln","m":"SEP","c":"9/10/2026","st":"Spec"},{"a":"2334 Crisp Gln","m":"SEP","c":"9/17/2026","st":"Spec"},{"a":"2339 Crisp Gln","m":"OCT","c":"10/5/2026","st":"Spec"},{"a":"2338 Crisp Gln","m":"OCT","c":"10/12/2026","st":"Spec"},{"a":"2347 Crisp Gln","m":"OCT","c":"10/14/2026","st":"Spec"},{"a":"2343 Crisp Gln","m":"OCT","c":"10/29/2026","st":"Spec"},{"a":"2350 Crisp Gln","m":"NOV","c":"11/5/2026","st":"Spec"},{"a":"2351 Crisp Gln","m":"DEC","c":"12/10/2026","st":"Spec"},{"a":"2354 Crisp Gln","m":"DEC","c":"12/10/2026","st":"Spec"},{"a":"2355 Crisp Gln","m":"DEC","c":"12/10/2026","st":"Spec"}]},{"name":"Garden Grove II","homes":[{"a":"8412 Rocket View","m":"AUG","c":"8/11/2026","st":"Spec"},{"a":"8358 Rocket View","m":"OCT","c":"10/26/2026","st":"Spec"},{"a":"8333 Rocket View","m":"NOV","c":"11/11/2026","st":"Spec"},{"a":"8337 Rocket View","m":"NOV","c":"11/11/2026","st":"Spec"},{"a":"8341 Rocket View","m":"NOV","c":"11/11/2026","st":"Spec"},{"a":"8350 Rocket View","m":"NOV","c":"11/13/2026","st":"Spec"},{"a":"8354 Rocket View","m":"NOV","c":"11/16/2026","st":"Spec"},{"a":"8329 Rocket View","m":"NOV","c":"11/24/2026","st":"Spec"},{"a":"8314 Rocket View","m":"DEC","c":"12/17/2026","st":"Spec"},{"a":"8318 Rocket View","m":"DEC","c":"12/18/2026","st":"Spec"}]},{"name":"Senna","homes":[{"a":"6571 Bufflehead Bend","m":"SEP","c":"9/16/2026","st":"Spec"},{"a":"6575 Bufflehead Bend","m":"SEP","c":"9/21/2026","st":"Spec"},{"a":"6562 Bufflehead Bend","m":"OCT","c":"10/12/2026","st":"Spec"},{"a":"6566 Bufflehead Bend","m":"OCT","c":"10/12/2026","st":"Spec"},{"a":"6583 Bufflehead Bend","m":"OCT","c":"10/12/2026","st":"Spec"},{"a":"6570 Bufflehead Bend","m":"OCT","c":"10/28/2026","st":"Spec"},{"a":"6574 Bufflehead Bend","m":"OCT","c":"10/28/2026","st":"Spec"},{"a":"7383 Teal Trace","m":"NOV","c":"11/5/2026","st":"Spec"},{"a":"7387 Teal Trace","m":"NOV","c":"11/5/2026","st":"Spec"},{"a":"7391 Teal Trace","m":"NOV","c":"11/5/2026","st":"Spec"}]},{"name":"Mesa Vista","homes":[{"a":"5531 Franklin Hills","m":"SEP","c":"9/3/2026","st":"Spec"},{"a":"5522 Franklin Hills","m":"SEP","c":"9/30/2026","st":"Spec"},{"a":"5523 Franklin Hills","m":"SEP","c":"9/30/2026","st":"Spec"},{"a":"5515 Franklin Hills","m":"OCT","c":"10/16/2026","st":"Spec"},{"a":"5518 Franklin Hills","m":"OCT","c":"10/16/2026","st":"Spec"},{"a":"5510 Franklin Hills","m":"NOV","c":"11/25/2026","st":"Spec"},{"a":"5511 Franklin Hills","m":"NOV","c":"11/25/2026","st":"Spec"},{"a":"5502 Franklin Hills","m":"DEC","c":"12/2/2026","st":"Spec"},{"a":"5506 Franklin Hills","m":"DEC","c":"12/2/2026","st":"Spec"}]},{"name":"Agave","homes":[{"a":"9224 Ocotillo Rdg","m":"DEC","c":"12/1/2026","st":"Spec"},{"a":"9228 Ocotillo Rdg","m":"DEC","c":"12/1/2026","st":"Spec"},{"a":"9302 Ocotillo Rdg","m":"DEC","c":"12/1/2026","st":"Spec"},{"a":"9212 Ocotillo Rdg","m":"DEC","c":"12/7/2026","st":"Spec"},{"a":"9216 Ocotillo Rdg","m":"DEC","c":"12/7/2026","st":"Spec"},{"a":"9220 Ocotillo Rdg","m":"DEC","c":"12/8/2026","st":"Spec"},{"a":"9204 Ocotillo Rdg","m":"DEC","c":"12/28/2026","st":"Spec"},{"a":"9208 Ocotillo Rdg","m":"DEC","c":"12/29/2026","st":"Spec"}]},{"name":"Summerlin","homes":[{"a":"15435 Lonehollow Lake","m":"JUL","c":"7/30/2026","st":"Spec"},{"a":"15440 Lonehollow Lake","m":"JUL","c":"7/30/2026","st":"Spec"},{"a":"15420 Lonehollow Lake","m":"AUG","c":"8/20/2026","st":"Spec"},{"a":"15416 Lonehollow Lake","m":"SEP","c":"9/8/2026","st":"Spec"},{"a":"15411 Lonehollow Lake","m":"SEP","c":"9/30/2026","st":"Spec"},{"a":"15419 Lonehollow Lake","m":"OCT","c":"10/2/2026","st":"Spec"}]},{"name":"Cinco Lakes","homes":[{"a":"8646 Rucker Pond Trail","m":"OCT","c":"10/12/2026","st":"Spec"},{"a":"8666 Rucker Pond Trail","m":"OCT","c":"10/16/2026","st":"Spec"},{"a":"8713 Rucker Pond Trail","m":"NOV","c":"11/19/2026","st":"Spec"},{"a":"8511 Smithers Avenue","m":"DEC","c":"12/9/2026","st":"Spec"},{"a":"8515 Smithers Avenue","m":"DEC","c":"12/10/2026","st":"Spec"},{"a":"8511 Rucker Pond Trail","m":"DEC","c":"12/29/2026","st":"Spec"}]},{"name":"Park Place II","homes":[{"a":"4423 Danforth St","m":"DEC","c":"12/17/2026","st":"Spec"},{"a":"4431 Danforth St","m":"DEC","c":"12/17/2026","st":"Spec"},{"a":"4427 Danforth St","m":"DEC","c":"12/18/2026","st":"Spec"},{"a":"4426 Danforth St","m":"DEC","c":"12/21/2026","st":"Spec"},{"a":"4430 Danforth St","m":"DEC","c":"12/22/2026","st":"Spec"},{"a":"4434 Danforth St","m":"DEC","c":"12/23/2026","st":"Spec"}]},{"name":"Park Place","homes":[{"a":"4330 Hobbiton Way","m":"JUL","c":"7/9/2026","st":"Spec"},{"a":"4306 Hobbiton Way","m":"SEP","c":"9/23/2026","st":"Spec"},{"a":"4232 Clarisse Street","m":"OCT","c":"10/5/2026","st":"Spec"},{"a":"4236 Clarisse Street","m":"OCT","c":"10/5/2026","st":"Spec"}]},{"name":"Spring Creek","homes":[{"a":"12502 Spike Heights","m":"OCT","c":"10/26/2026","st":"Spec"},{"a":"12420 Spike Heights","m":"OCT","c":"10/27/2026","st":"Spec"},{"a":"2106 Tb Place","m":"NOV","c":"11/18/2026","st":"Spec"},{"a":"2114 Tb Place","m":"NOV","c":"11/18/2026","st":"Spec"}]},{"name":"Hiddenbrooke","homes":[{"a":"2520 Heritance Pass","m":"JUL","c":"7/20/2026","st":"Spec"},{"a":"2528 Heritance Pass","m":"JUL","c":"7/28/2026","st":"Spec"},{"a":"2529 Heritance Pass","m":"JUL","c":"7/28/2026","st":"Spec"}]},{"name":"Rosemont Hill 30 NPL","homes":[{"a":"10639 Rosemont Pass","m":"JUN","c":"6/19/2026","st":"Spec"},{"a":"8922 Wildwood Pass","m":"NOV","c":"11/25/2026","st":"Spec"}]}];
+const SOLD=new Set(); // add addresses here (e.g. "9302 Ocotillo Rdg") to mark a home sold
+const CLOSED=0; // Number of homes closed so far
+const END=new Date(2026,11,31,23,59,59), START=new Date(2026,9,1);
+let month='ALL';
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// Merge Rosemont Hill and Park Place communities
+const merged=[];
+for(let d of DATA){
+  if(d.name.startsWith('Rosemont Hill')){
+    const existing=merged.find(x=>x.name==='Rosemont Hill');
+    if(existing){
+      existing.homes=[...existing.homes,...d.homes];
+    }else{
+      merged.push({name:'Rosemont Hill',homes:d.homes});
+    }
+  }else if(d.name.startsWith('Park Place')){
+    const existing=merged.find(x=>x.name==='Park Place');
+    if(existing){
+      existing.homes=[...existing.homes,...d.homes];
+    }else{
+      merged.push({name:'Park Place',homes:d.homes});
+    }
+  }else{
+    merged.push(d);
+  }
+}
+const DATA_MERGED=merged;
+function stats(){
+  const now=new Date(), total=Math.round((END-START)/864e5);
+  const days=Math.max(0,Math.ceil((END-Math.max(now,START))/864e5));
+  document.getElementById('days').textContent=days;
+  document.getElementById('r1').style.setProperty('--p',Math.round(days/total*100));
+  const all=DATA_MERGED.reduce((n,c)=>n+c.homes.length,0), sold=DATA_MERGED.reduce((n,c)=>n+c.homes.filter(h=>SOLD.has(h.a)).length,0);
+  document.getElementById('left').textContent=all-sold;
+  document.getElementById('r2').style.setProperty('--p',Math.round((all-sold)/all*100));
+}
+function render(){
+  const g=document.getElementById('grid');g.innerHTML='';
+  DATA_MERGED.forEach(c=>{
+    const hs=c.homes.filter(h=>month==='ALL'||h.m===month);
+    if(!hs.length)return;
+    const sold=hs.filter(h=>SOLD.has(h.a)).length;
+    const d=document.createElement('section');d.className='card';
+    const cm=CMS[c.name]||'TBD';
+    const agents=(SALES[c.name]||[]).join(', ')||'TBD';
+    d.innerHTML='<h3>'+esc(c.name)+'</h3><p class="cnt">CM: <span style="color:var(--gold);font-weight:600">'+esc(cm)+'</span></p><p class="cnt">Sales: <span style="color:var(--teal);font-weight:600">'+esc(agents)+'</span></p><p class="cnt">Sales Until Target Met: <span style="color:var(--teal);font-weight:600">'+hs.length+'</span></p><p class="cnt">'+hs.length+' qualifying home'+(hs.length>1?'s':'')+(sold?' &middot; '+sold+' sold':'')+'</p><ul>'+
+      hs.map(h=>'<li'+(SOLD.has(h.a)?' class="sold"':'')+'><span class="tag '+h.m.toLowerCase()+'">'+h.m+'</span><span class="addr">'+esc(h.a)+'</span><span style="font-size:11px;color:var(--mute)">—</span></li>').join('')+'</ul>';
+    g.appendChild(d);
+  });
+}
+const F=document.getElementById('filters');
+['ALL','OCT','NOV','DEC'].forEach(m=>{
+  const b=document.createElement('button');b.className='pill';b.textContent=m==='ALL'?'All':m[0]+m.slice(1).toLowerCase();
+  b.setAttribute('aria-pressed',m==='ALL');
+  b.onclick=()=>{month=m;[...F.children].forEach(x=>x.setAttribute('aria-pressed',x===b));render();};
+  F.appendChild(b);
+});
+stats();render();
+// Populate community scoreboard
+const board=document.getElementById('community-board');
+DATA_MERGED.forEach(c=>{
+  const item=document.createElement('div');
+  item.className='team-item';
+  item.innerHTML='<div class="team-item-name">'+esc(c.name)+'</div><div class="team-item-stat">'+c.homes.length+'</div><div style="font-size:11px;color:var(--mute)">homes</div>';
+  board.appendChild(item);
+});
+</script>
