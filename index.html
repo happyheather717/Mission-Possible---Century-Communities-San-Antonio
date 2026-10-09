@@ -45,6 +45,10 @@ li{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid v
 .tag.nov{border-color:var(--lav);color:#cdbcff}
 .tag.dec{border-color:var(--gold);color:var(--gold)}
 .addr{min-width:0;overflow-wrap:anywhere}
+.status{flex:none;font-size:11px;font-weight:600;letter-spacing:.04em;padding:2px 6px;border-radius:4px}
+.status.pending{background:var(--panel2);color:var(--mute);border:1px solid var(--line)}
+.status.contract{background:var(--lav);color:var(--ink);border:1px solid var(--lav)}
+.status.closed{background:var(--gold);color:var(--ink);border:1px solid var(--gold)}
 li.sold{background:var(--gold);color:var(--ink);border-radius:6px;padding-inline:8px;margin-block:2px;border-top-color:transparent;font-weight:600}
 li.sold .addr{text-decoration:line-through}
 li.sold .tag{background:var(--ink);border-color:var(--ink);color:var(--gold)}
@@ -170,6 +174,9 @@ li.sold .tag{background:var(--ink);border-color:var(--ink);color:var(--gold)}
   </div>
   <div class="filters" role="group" aria-label="Filter by closing month" id="filters"></div>
  </div>
+
+ <div id="status-totals" style="margin:20px auto;max-width:1180px;padding-inline:16px"></div>
+
  <main class="grid" id="grid"></main>
  <p class="foot">Target months come from the projected completion date on the 9/29/2026 HITS List. Homes marked sold show in gold with the address struck through.</p>
 
@@ -192,7 +199,7 @@ li.sold .tag{background:var(--ink);border-color:var(--ink);color:var(--gold)}
      <div>Builder</div>
      <div text-align:right>Date of Closing</div>
     </div>
-    <div class="placeholder" style="padding:20px 0">Homes will appear as they complete</div>
+    <div class="placeholder" style="padding:20px 0">Homes will appear as they close</div>
    </div>
   </div>
  </section>
@@ -206,7 +213,7 @@ li.sold .tag{background:var(--ink);border-color:var(--ink);color:var(--gold)}
    </div>
    <div class="lb">
     <h3>Construction MVPs</h3>
-    <div class="placeholder">MVPs will be determined as homes complete</div>
+    <div class="placeholder">MVPs will be determined as homes close</div>
    </div>
   </div>
  </section>
@@ -225,22 +232,16 @@ li.sold .tag{background:var(--ink);border-color:var(--ink);color:var(--gold)}
  <section class="section">
   <h2>On the Podium</h2>
   <div class="company-wide">
-   <div class="placeholder" style="padding:40px 20px">Podium standings will appear as homes close during the contest</div>
+   <h3>Sales Agent Standings</h3>
+   <div class="team-grid" id="podium-board"></div>
   </div>
  </section>
 
- <section class="section">
-  <h2>Community Scoreboard</h2>
-  <div class="company-wide">
-   <h3>Performance by Community</h3>
-   <div class="team-grid" id="community-board"></div>
-  </div>
- </section>
 
  <section class="section">
   <h2>Recent Sales</h2>
   <div class="recent">
-   <div class="placeholder">Sales will appear here as homes close</div>
+   <div id="recent-sales"></div>
   </div>
  </section>
 
@@ -296,7 +297,7 @@ const SALES={
 'Cinco Lakes':['Juan Calderon','Anthony Luna'],
 'Garden Grove II':['Arleth Estrada','Jaime Rios'],
 'Hacienda':['Isaac Munoz','Abdiel Serrano'],
-'Hiddenbrooke':['Manijeh Huereca'],
+'Hiddenbrooke':['Manijech Huereca'],
 'Mesa Vista':['Jose Ochoa','Paulina Pena'],
 'Park Place':['Jason Giuca','Kassidy Kowalski'],
 'Rosemont Hill':['Zaid Nawayseh','Claudia Ramos'],
@@ -307,6 +308,32 @@ const SALES={
 const DATA=[{"name":"Hacienda","homes":[{"a":"9934 Chavaneaux Lndg","m":"JUL","c":"7/10/2026","st":"Spec"},{"a":"9947 Chavaneaux Lndg","m":"AUG","c":"8/21/2026","st":"Spec"},{"a":"9946 Chavaneaux Lndg","m":"SEP","c":"9/10/2026","st":"Spec"},{"a":"9954 Chavaneaux Lndg","m":"SEP","c":"9/24/2026","st":"Spec"},{"a":"9962 Chavaneaux Lndg","m":"OCT","c":"10/23/2026","st":"Spec"},{"a":"9966 Chavaneaux Lndg","m":"NOV","c":"11/4/2026","st":"Spec"},{"a":"9970 Chavaneaux Lndg","m":"NOV","c":"11/9/2026","st":"Spec"},{"a":"9971 Chavaneaux Lndg","m":"NOV","c":"11/13/2026","st":"Spec"},{"a":"9967 Chavaneaux Lndg","m":"NOV","c":"11/17/2026","st":"Spec"},{"a":"9974 Chavaneaux Lndg","m":"NOV","c":"11/19/2026","st":"Spec"},{"a":"9982 Chavaneaux Lndg","m":"NOV","c":"11/24/2026","st":"Spec"},{"a":"9978 Chavaneaux Lndg","m":"NOV","c":"11/25/2026","st":"Spec"},{"a":"9983 Chavaneaux Lndg","m":"DEC","c":"12/1/2026","st":"Spec"},{"a":"9986 Chavaneaux Lndg","m":"DEC","c":"12/10/2026","st":"Spec"},{"a":"9987 Chavaneaux Lndg","m":"DEC","c":"12/10/2026","st":"Spec"}]},{"name":"Rosemont Hill 25 NPL","homes":[{"a":"9027 Summerwood Bend","m":"JUN","c":"6/19/2026","st":"Spec"},{"a":"10630 Rosemont Pass","m":"SEP","c":"9/14/2026","st":"Spec"},{"a":"10634 Rosemont Pass","m":"SEP","c":"9/14/2026","st":"Spec"},{"a":"10626 Rosemont Pass","m":"SEP","c":"9/15/2026","st":"Spec"},{"a":"10602 Rosemont Pass","m":"SEP","c":"9/29/2026","st":"Spec"},{"a":"10606 Rosemont Pass","m":"SEP","c":"9/29/2026","st":"Spec"},{"a":"10614 Rosemont Pass","m":"SEP","c":"9/29/2026","st":"Spec"},{"a":"10618 Rosemont Pass","m":"OCT","c":"10/7/2026","st":"Spec"},{"a":"10614 Rosemont Hill","m":"NOV","c":"11/6/2026","st":"Spec"},{"a":"10610 Rosemont Hill","m":"NOV","c":"11/9/2026","st":"Spec"},{"a":"10606 Rosemont Hill","m":"NOV","c":"11/11/2026","st":"Spec"},{"a":"10607 Eaglewood Bend","m":"NOV","c":"11/30/2026","st":"Spec"},{"a":"10610 Eaglewood Bend","m":"NOV","c":"11/30/2026","st":"Spec"},{"a":"10618 Rosemont Hill","m":"NOV","c":"11/30/2026","st":"Spec"}]},{"name":"Applewhite Meadows","homes":[{"a":"10822 Apple Pie Road","m":"JUN","c":"6/2/2026","st":"Spec"},{"a":"2326 Crisp Gln","m":"JUL","c":"7/16/2026","st":"Spec"},{"a":"2323 Crisp Gln","m":"AUG","c":"8/5/2026","st":"Spec"},{"a":"2331 Crisp Gln","m":"SEP","c":"9/10/2026","st":"Spec"},{"a":"2334 Crisp Gln","m":"SEP","c":"9/17/2026","st":"Spec"},{"a":"2339 Crisp Gln","m":"OCT","c":"10/5/2026","st":"Spec"},{"a":"2338 Crisp Gln","m":"OCT","c":"10/12/2026","st":"Spec"},{"a":"2347 Crisp Gln","m":"OCT","c":"10/14/2026","st":"Spec"},{"a":"2343 Crisp Gln","m":"OCT","c":"10/29/2026","st":"Spec"},{"a":"2350 Crisp Gln","m":"NOV","c":"11/5/2026","st":"Spec"},{"a":"2351 Crisp Gln","m":"DEC","c":"12/10/2026","st":"Spec"},{"a":"2354 Crisp Gln","m":"DEC","c":"12/10/2026","st":"Spec"},{"a":"2355 Crisp Gln","m":"DEC","c":"12/10/2026","st":"Spec"}]},{"name":"Garden Grove II","homes":[{"a":"8412 Rocket View","m":"AUG","c":"8/11/2026","st":"Spec"},{"a":"8358 Rocket View","m":"OCT","c":"10/26/2026","st":"Spec"},{"a":"8333 Rocket View","m":"NOV","c":"11/11/2026","st":"Spec"},{"a":"8337 Rocket View","m":"NOV","c":"11/11/2026","st":"Spec"},{"a":"8341 Rocket View","m":"NOV","c":"11/11/2026","st":"Spec"},{"a":"8350 Rocket View","m":"NOV","c":"11/13/2026","st":"Spec"},{"a":"8354 Rocket View","m":"NOV","c":"11/16/2026","st":"Spec"},{"a":"8329 Rocket View","m":"NOV","c":"11/24/2026","st":"Spec"},{"a":"8314 Rocket View","m":"DEC","c":"12/17/2026","st":"Spec"},{"a":"8318 Rocket View","m":"DEC","c":"12/18/2026","st":"Spec"}]},{"name":"Senna","homes":[{"a":"6571 Bufflehead Bend","m":"SEP","c":"9/16/2026","st":"Spec"},{"a":"6575 Bufflehead Bend","m":"SEP","c":"9/21/2026","st":"Spec"},{"a":"6562 Bufflehead Bend","m":"OCT","c":"10/12/2026","st":"Spec"},{"a":"6566 Bufflehead Bend","m":"OCT","c":"10/12/2026","st":"Spec"},{"a":"6583 Bufflehead Bend","m":"OCT","c":"10/12/2026","st":"Spec"},{"a":"6570 Bufflehead Bend","m":"OCT","c":"10/28/2026","st":"Spec"},{"a":"6574 Bufflehead Bend","m":"OCT","c":"10/28/2026","st":"Spec"},{"a":"7383 Teal Trace","m":"NOV","c":"11/5/2026","st":"Spec"},{"a":"7387 Teal Trace","m":"NOV","c":"11/5/2026","st":"Spec"},{"a":"7391 Teal Trace","m":"NOV","c":"11/5/2026","st":"Spec"}]},{"name":"Mesa Vista","homes":[{"a":"5531 Franklin Hills","m":"SEP","c":"9/3/2026","st":"Spec"},{"a":"5522 Franklin Hills","m":"SEP","c":"9/30/2026","st":"Spec"},{"a":"5523 Franklin Hills","m":"SEP","c":"9/30/2026","st":"Spec"},{"a":"5515 Franklin Hills","m":"OCT","c":"10/16/2026","st":"Spec"},{"a":"5518 Franklin Hills","m":"OCT","c":"10/16/2026","st":"Spec"},{"a":"5510 Franklin Hills","m":"NOV","c":"11/25/2026","st":"Spec"},{"a":"5511 Franklin Hills","m":"NOV","c":"11/25/2026","st":"Spec"},{"a":"5502 Franklin Hills","m":"DEC","c":"12/2/2026","st":"Spec"},{"a":"5506 Franklin Hills","m":"DEC","c":"12/2/2026","st":"Spec"}]},{"name":"Agave","homes":[{"a":"9224 Ocotillo Rdg","m":"DEC","c":"12/1/2026","st":"Spec"},{"a":"9228 Ocotillo Rdg","m":"DEC","c":"12/1/2026","st":"Spec"},{"a":"9302 Ocotillo Rdg","m":"DEC","c":"12/1/2026","st":"Spec"},{"a":"9212 Ocotillo Rdg","m":"DEC","c":"12/7/2026","st":"Spec"},{"a":"9216 Ocotillo Rdg","m":"DEC","c":"12/7/2026","st":"Spec"},{"a":"9220 Ocotillo Rdg","m":"DEC","c":"12/8/2026","st":"Spec"},{"a":"9204 Ocotillo Rdg","m":"DEC","c":"12/28/2026","st":"Spec"},{"a":"9208 Ocotillo Rdg","m":"DEC","c":"12/29/2026","st":"Spec"}]},{"name":"Summerlin","homes":[{"a":"15435 Lonehollow Lake","m":"JUL","c":"7/30/2026","st":"Spec"},{"a":"15440 Lonehollow Lake","m":"JUL","c":"7/30/2026","st":"Spec"},{"a":"15420 Lonehollow Lake","m":"AUG","c":"8/20/2026","st":"Spec"},{"a":"15416 Lonehollow Lake","m":"SEP","c":"9/8/2026","st":"Spec"},{"a":"15411 Lonehollow Lake","m":"SEP","c":"9/30/2026","st":"Spec"},{"a":"15419 Lonehollow Lake","m":"OCT","c":"10/2/2026","st":"Spec"}]},{"name":"Cinco Lakes","homes":[{"a":"8646 Rucker Pond Trail","m":"OCT","c":"10/12/2026","st":"Spec"},{"a":"8666 Rucker Pond Trail","m":"OCT","c":"10/16/2026","st":"Spec"},{"a":"8713 Rucker Pond Trail","m":"NOV","c":"11/19/2026","st":"Spec"},{"a":"8511 Smithers Avenue","m":"DEC","c":"12/9/2026","st":"Spec"},{"a":"8515 Smithers Avenue","m":"DEC","c":"12/10/2026","st":"Spec"},{"a":"8511 Rucker Pond Trail","m":"DEC","c":"12/29/2026","st":"Spec"}]},{"name":"Park Place II","homes":[{"a":"4423 Danforth St","m":"DEC","c":"12/17/2026","st":"Spec"},{"a":"4431 Danforth St","m":"DEC","c":"12/17/2026","st":"Spec"},{"a":"4427 Danforth St","m":"DEC","c":"12/18/2026","st":"Spec"},{"a":"4426 Danforth St","m":"DEC","c":"12/21/2026","st":"Spec"},{"a":"4430 Danforth St","m":"DEC","c":"12/22/2026","st":"Spec"},{"a":"4434 Danforth St","m":"DEC","c":"12/23/2026","st":"Spec"}]},{"name":"Park Place","homes":[{"a":"4330 Hobbiton Way","m":"JUL","c":"7/9/2026","st":"Spec"},{"a":"4306 Hobbiton Way","m":"SEP","c":"9/23/2026","st":"Spec"},{"a":"4232 Clarisse Street","m":"OCT","c":"10/5/2026","st":"Spec"},{"a":"4236 Clarisse Street","m":"OCT","c":"10/5/2026","st":"Spec"}]},{"name":"Spring Creek","homes":[{"a":"12502 Spike Heights","m":"OCT","c":"10/26/2026","st":"Spec"},{"a":"12420 Spike Heights","m":"OCT","c":"10/27/2026","st":"Spec"},{"a":"2106 Tb Place","m":"NOV","c":"11/18/2026","st":"Spec"},{"a":"2114 Tb Place","m":"NOV","c":"11/18/2026","st":"Spec"}]},{"name":"Hiddenbrooke","homes":[{"a":"2520 Heritance Pass","m":"JUL","c":"7/20/2026","st":"Spec"},{"a":"2528 Heritance Pass","m":"JUL","c":"7/28/2026","st":"Spec"},{"a":"2529 Heritance Pass","m":"JUL","c":"7/28/2026","st":"Spec"}]},{"name":"Rosemont Hill 30 NPL","homes":[{"a":"10639 Rosemont Pass","m":"JUN","c":"6/19/2026","st":"Spec"},{"a":"8922 Wildwood Pass","m":"NOV","c":"11/25/2026","st":"Spec"}]}];
 const SOLD=new Set(); // add addresses here (e.g. "9302 Ocotillo Rdg") to mark a home sold
 const CLOSED=0; // Number of homes closed so far
+const STATUS={
+  '4423 Danforth St':'PENDING',
+  '2343 Crisp Gln':'PENDING',
+  '2326 Crisp Gln':'PENDING',
+  '5522 Franklin Hills':'CONTRACT',
+  '2529 Heritance Pass':'CONTRACT',
+  '9224 Ocotillo Rdg':'PENDING',
+  '8666 Rucker Pond Trail':'PENDING',
+  '10639 Rosemont Pass':'CONTRACT',
+  '10602 Rosemont Pass':'CONTRACT',
+  '5511 Franklin Hills':'CONTRACT',
+  '5518 Franklin Hills':'CONTRACT'
+};
+const AGENT_MAP={
+  '4423 Danforth St':'Jason Giuca',
+  '2343 Crisp Gln':'Brenda Herrera',
+  '2326 Crisp Gln':'Cesario Gutierrez',
+  '5522 Franklin Hills':'Torey Bailey',
+  '2529 Heritance Pass':'Brenda Herrera',
+  '9224 Ocotillo Rdg':'Jose Ochoa',
+  '8666 Rucker Pond Trail':'Jose Ochoa',
+  '10639 Rosemont Pass':'Claudia Ramos',
+  '10602 Rosemont Pass':'Zaid Nawayseh',
+  '5511 Franklin Hills':'Arleth Estrada',
+  '5518 Franklin Hills':'Jaime Rios'
+};
 const END=new Date(2026,11,31,23,59,59), START=new Date(2026,9,1);
 let month='ALL';
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -351,7 +378,7 @@ function render(){
     const cm=CMS[c.name]||'TBD';
     const agents=(SALES[c.name]||[]).join(', ')||'TBD';
     d.innerHTML='<h3>'+esc(c.name)+'</h3><p class="cnt">CM: <span style="color:var(--gold);font-weight:600">'+esc(cm)+'</span></p><p class="cnt">Sales: <span style="color:var(--teal);font-weight:600">'+esc(agents)+'</span></p><p class="cnt">Sales Until Target Met: <span style="color:var(--teal);font-weight:600">'+hs.length+'</span></p><p class="cnt">'+hs.length+' qualifying home'+(hs.length>1?'s':'')+(sold?' &middot; '+sold+' sold':'')+'</p><ul>'+
-      hs.map(h=>'<li'+(SOLD.has(h.a)?' class="sold"':'')+'><span class="tag '+h.m.toLowerCase()+'">'+h.m+'</span><span class="addr">'+esc(h.a)+'</span><span style="font-size:11px;color:var(--mute)">—</span></li>').join('')+'</ul>';
+      hs.map(h=>{const st=STATUS[h.a];const agent=AGENT_MAP[h.a]||'';return '<li'+(SOLD.has(h.a)?' class="sold"':'')+'><span class="tag '+h.m.toLowerCase()+'">'+h.m+'</span><span class="addr">'+esc(h.a)+'</span>'+(st?'<span class="status '+st.toLowerCase()+'">'+st+(agent?' · '+esc(agent):'')+'</span>':'')+'</li>';}).join('')+'</ul>';
     g.appendChild(d);
   });
 }
@@ -363,12 +390,73 @@ const F=document.getElementById('filters');
   F.appendChild(b);
 });
 stats();render();
+// Populate qualifying homes totals
+const statusTotals=document.getElementById('status-totals');
+let totalPending=0,totalContract=0,totalClosed=0,totalHomes=0;
+DATA_MERGED.forEach(c=>{
+  totalHomes+=c.homes.length;
+  c.homes.forEach(h=>{
+    const st=STATUS[h.a];
+    if(st==='PENDING')totalPending++;
+    else if(st==='CONTRACT')totalContract++;
+    else if(st==='CLOSED')totalClosed++;
+  });
+});
+statusTotals.innerHTML='<div class="lb"><div class="stat-row"><span class="stat-label">Pending</span>&nbsp;<span class="stat-value" style="color:var(--lav)">'+totalPending+'</span></div><div class="stat-row"><span class="stat-label">Contract</span>&nbsp;<span class="stat-value" style="color:var(--gold)">'+totalContract+'</span></div><div class="stat-row"><span class="stat-label">Closed</span>&nbsp;<span class="stat-value" style="color:var(--teal)">'+totalClosed+'</span></div></div>';
+// Populate podium - agent standings
+const allAgents=new Set();
+Object.values(AGENT_MAP).forEach(a=>allAgents.add(a));
+const agentStats=Array.from(allAgents).map(agent=>{
+  let pending=0,contract=0,closed=0;
+  Object.entries(AGENT_MAP).forEach(([addr,a])=>{
+    if(a===agent){
+      const st=STATUS[addr];
+      if(st==='PENDING')pending++;
+      else if(st==='CONTRACT')contract++;
+      else if(st==='CLOSED')closed++;
+    }
+  });
+  return {agent,pending,contract,closed,total:pending+contract+closed};
+}).sort((a,b)=>(b.contract+b.closed)-(a.contract+a.closed));
+const podium=document.getElementById('podium-board');
+agentStats.forEach(s=>{
+  const item=document.createElement('div');
+  item.className='team-item';
+  item.innerHTML='<div class="team-item-name">'+esc(s.agent)+'</div><div style="font-size:12px;color:var(--mute);margin:6px 0"><span style="color:var(--lav)">● Pending: '+s.pending+'</span> <span style="color:var(--gold);margin-left:8px">● Contract: '+s.contract+'</span></div><div style="font-size:11px;color:var(--mute)">Total: '+s.total+' homes</div>';
+  podium.appendChild(item);
+});
+// Populate recent sales (CONTRACT status)
+const recentContainer=document.getElementById('recent-sales');
+const contractSales=[];
+Object.entries(STATUS).forEach(([addr,st])=>{
+  if(st==='CONTRACT'){
+    const agent=AGENT_MAP[addr]||'TBD';
+    contractSales.push({addr,agent});
+  }
+});
+if(contractSales.length>0){
+  contractSales.forEach(s=>{
+    const item=document.createElement('div');
+    item.className='sale-item';
+    item.innerHTML='<div><div class="sale-address">'+esc(s.addr)+'</div><div class="sale-agent">Agent: '+esc(s.agent)+'</div></div><div class="sale-date">CONTRACT</div>';
+    recentContainer.appendChild(item);
+  });
+}else{
+  recentContainer.innerHTML='<div class="placeholder">Sales will appear here as homes contract</div>';
+}
 // Populate community scoreboard
 const board=document.getElementById('community-board');
 DATA_MERGED.forEach(c=>{
+  let pending=0,contract=0,closed=0;
+  c.homes.forEach(h=>{
+    const st=STATUS[h.a];
+    if(st==='PENDING')pending++;
+    else if(st==='CONTRACT')contract++;
+    else if(st==='CLOSED')closed++;
+  });
   const item=document.createElement('div');
   item.className='team-item';
-  item.innerHTML='<div class="team-item-name">'+esc(c.name)+'</div><div class="team-item-stat">'+c.homes.length+'</div><div style="font-size:11px;color:var(--mute)">homes</div>';
+  item.innerHTML='<div class="team-item-name">'+esc(c.name)+'</div><div style="font-size:12px;color:var(--mute);margin:6px 0"><span style="color:var(--lav)">● Pending: '+pending+'</span> <span style="color:var(--gold);margin-left:8px">● Contract: '+contract+'</span></div><div style="font-size:11px;color:var(--mute)">Total: '+c.homes.length+' homes</div>';
   board.appendChild(item);
 });
 </script>
