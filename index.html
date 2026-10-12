@@ -1,3 +1,4 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Mission Possible</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
@@ -18,12 +19,27 @@ body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14px
 h1{font-family:var(--display);font-weight:800;font-size:clamp(38px,7vw,58px);line-height:1;margin:0 0 6px;text-transform:uppercase;letter-spacing:.01em;text-wrap:balance}
 .sub{color:var(--mute);margin:0 0 12px;max-width:52ch}
 .prize{display:inline-block;background:var(--gold);color:var(--ink);font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.03em;padding:6px 16px;border-radius:6px}
-.stats{display:flex;gap:12px;flex-wrap:wrap}
+.stats{display:flex;gap:12px;flex-wrap:wrap;flex-direction:column}
 .stat{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:8px 18px 8px 8px;display:flex;align-items:center;gap:10px}
 .ring{width:38px;height:38px;border-radius:50%;background:conic-gradient(var(--c) calc(var(--p)*1%),var(--line) 0);display:grid;place-items:center;flex:none}
 .ring::after{content:"";width:28px;height:28px;border-radius:50%;background:var(--panel2)}
 .stat b{font-family:var(--display);font-size:26px;line-height:1;font-variant-numeric:tabular-nums}
 .stat span{color:var(--mute);font-size:13px}
+.gauges{display:flex;gap:12px}
+.gauge{flex:1;min-width:122px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px 14px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.gauge h3{font-family:var(--display);font-size:15px;text-transform:uppercase;letter-spacing:.04em;margin:0;color:var(--g)}
+.goal{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em;margin:2px 0 8px}
+.goal b{display:block;font-family:var(--display);font-size:22px;color:var(--fg);letter-spacing:0;line-height:1.1}
+.thermo{display:flex;flex-direction:column;align-items:center;margin-right:30px}
+.tube-col{position:relative}
+.tube{width:22px;height:150px;background:var(--bg);border:2px solid var(--line);border-bottom:none;border-radius:11px 11px 0 0;position:relative;overflow:hidden}
+.tube .fill{position:absolute;left:0;right:0;bottom:0;height:0;background:var(--g);transition:height 1s ease}
+.scale{position:absolute;left:calc(100% + 6px);top:-6px;height:162px;display:flex;flex-direction:column;justify-content:space-between;font-size:10px;color:var(--mute);text-align:left;font-variant-numeric:tabular-nums}
+.scale span::before{content:"";display:inline-block;width:6px;border-top:1px solid var(--line);margin-right:4px;vertical-align:middle}
+.scale span:first-child{color:var(--fg);font-weight:600}
+.bulb{width:42px;height:42px;margin-top:-4px;border-radius:50%;background:var(--g);border:2px solid var(--line);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:18px;color:var(--ink);position:relative;z-index:1}
+.gauge-pct{font-size:12px;color:var(--mute);margin-top:8px}
+.gauge-pct b{color:var(--g)}
 .bar{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center;justify-content:space-between}
 .legend{display:flex;gap:18px;flex-wrap:wrap;color:var(--mute);font-size:13px}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
@@ -149,6 +165,7 @@ li.sold .tag{background:var(--ink);border-color:var(--ink);color:var(--gold)}
   <div class="stats">
    <div class="stat"><div class="ring" id="r1" style="--c:var(--gold);--p:0"></div><div><b id="days">0</b> <span>days left in the contest</span></div></div>
    <div class="stat"><div class="ring" id="r2" style="--c:var(--teal);--p:100"></div><div><b id="left">0</b> <span>homes left to close</span></div></div>
+   <div class="gauges" id="status-chart"></div>
   </div>
  </header>
  <div class="legend" aria-label="Legend">
@@ -174,8 +191,6 @@ li.sold .tag{background:var(--ink);border-color:var(--ink);color:var(--gold)}
   </div>
   <div class="filters" role="group" aria-label="Filter by closing month" id="filters"></div>
  </div>
-
- <div id="status-totals" style="margin:20px auto;max-width:1180px;padding-inline:16px"></div>
 
  <main class="grid" id="grid"></main>
  <p class="foot">Target months come from the projected completion date on the 9/29/2026 HITS List. Homes marked sold show in gold with the address struck through.</p>
@@ -363,6 +378,39 @@ for(let d of DATA){
   }
 }
 const DATA_MERGED=merged;
+// Barometer goals: set a number to override; null = all qualifying homes in the contest
+const GOAL_PENDING=null;
+const GOAL_CONTRACT=null;
+const GOAL_CLOSED=null;
+function updateStatusChart(){
+  const chart=document.getElementById('status-chart');
+  let total=0,pending=0,contract=0,closed=0;
+  DATA_MERGED.forEach(c=>c.homes.forEach(h=>{
+    total++;
+    const st=STATUS[h.a];
+    if(st==='CLOSED'||SOLD.has(h.a))closed++;
+    else if(st==='CONTRACT')contract++;
+    else if(st==='PENDING')pending++;
+  }));
+  const gauges=[
+    {title:'Pending',value:pending,goal:GOAL_PENDING||total,color:'var(--lav)'},
+    {title:'Under Contract',value:contract,goal:GOAL_CONTRACT||total,color:'var(--gold)'},
+    {title:'Closed',value:closed,goal:GOAL_CLOSED||total,color:'var(--teal)'}
+  ];
+  chart.innerHTML=gauges.map(g=>{
+    const pct=Math.min(100,Math.round(g.value/g.goal*100));
+    const ticks=[g.goal,Math.round(g.goal*.75),Math.round(g.goal*.5),Math.round(g.goal*.25),0];
+    return '<div class="gauge" style="--g:'+g.color+'" role="img" aria-label="'+g.title+': '+g.value+' of '+g.goal+' goal">'+
+      '<h3>'+g.title+'</h3><div class="goal">Goal<b>'+g.goal+'</b></div>'+
+      '<div class="thermo"><div class="tube-col"><div class="tube"><div class="fill" data-h="'+pct+'"></div></div>'+
+      '<div class="scale">'+ticks.map(t=>'<span>'+t+'</span>').join('')+'</div></div>'+
+      '<div class="bulb">'+g.value+'</div></div>'+
+      '<div class="gauge-pct"><b>'+pct+'%</b> of goal</div></div>';
+  }).join('');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    chart.querySelectorAll('.fill').forEach(f=>f.style.height=Math.max(f.dataset.h,f.dataset.h>0?3:0)+'%');
+  }));
+}
 function stats(){
   const now=new Date(), total=Math.round((END-START)/864e5);
   const days=Math.max(0,Math.ceil((END-Math.max(now,START))/864e5));
@@ -371,6 +419,7 @@ function stats(){
   const all=DATA_MERGED.reduce((n,c)=>n+c.homes.length,0), sold=DATA_MERGED.reduce((n,c)=>n+c.homes.filter(h=>SOLD.has(h.a)).length,0);
   document.getElementById('left').textContent=all-sold;
   document.getElementById('r2').style.setProperty('--p',Math.round((all-sold)/all*100));
+  updateStatusChart();
 }
 function render(){
   const g=document.getElementById('grid');g.innerHTML='';
@@ -395,7 +444,6 @@ const F=document.getElementById('filters');
 });
 stats();render();
 // Populate qualifying homes totals
-const statusTotals=document.getElementById('status-totals');
 let totalPending=0,totalContract=0,totalClosed=0,totalHomes=0;
 DATA_MERGED.forEach(c=>{
   totalHomes+=c.homes.length;
@@ -406,7 +454,6 @@ DATA_MERGED.forEach(c=>{
     else if(st==='CLOSED')totalClosed++;
   });
 });
-statusTotals.innerHTML='<div class="lb"><div class="stat-row"><span class="stat-label">Pending</span>&nbsp;<span class="stat-value" style="color:var(--lav)">'+totalPending+'</span></div><div class="stat-row"><span class="stat-label">Contract</span>&nbsp;<span class="stat-value" style="color:var(--gold)">'+totalContract+'</span></div><div class="stat-row"><span class="stat-label">Closed</span>&nbsp;<span class="stat-value" style="color:var(--teal)">'+totalClosed+'</span></div></div>';
 // Populate podium - agent standings
 const allAgents=new Set();
 Object.values(AGENT_MAP).forEach(a=>allAgents.add(a));
@@ -464,3 +511,5 @@ DATA_MERGED.forEach(c=>{
   board.appendChild(item);
 });
 </script>
+
+</body></html>
