@@ -50,7 +50,7 @@ button{font:inherit;cursor:pointer}
 .pill:hover{border-color:var(--lav)}
 .pill[aria-pressed=true]{background:var(--gold);border-color:var(--gold);color:var(--ink)}
 .pill:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;align-items:start}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:16px;align-items:start}
 .card{background:var(--panel);border-radius:12px;border-top:3px solid var(--lav);padding:14px 14px 10px;min-width:0}
 .card h3{font-family:var(--display);font-size:22px;letter-spacing:.02em;text-transform:uppercase;margin:0;line-height:1.1}
 .cnt{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:2px 0 8px}
@@ -60,8 +60,8 @@ li{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid v
 .tag.oct{border-color:var(--teal);color:var(--teal)}
 .tag.nov{border-color:var(--lav);color:#cdbcff}
 .tag.dec{border-color:var(--gold);color:var(--gold)}
-.addr{min-width:0;overflow-wrap:anywhere}
-.status{flex:none;font-size:11px;font-weight:600;letter-spacing:.04em;padding:2px 6px;border-radius:4px}
+.addr{flex:none;white-space:nowrap}
+.status{flex:0 1 auto;margin-left:auto;text-align:center;font-size:11px;font-weight:600;letter-spacing:.04em;padding:2px 6px;border-radius:4px}
 .status.pending{background:var(--panel2);color:var(--mute);border:1px solid var(--line)}
 .status.contract{background:var(--lav);color:var(--ink);border:1px solid var(--lav)}
 .status.closed{background:var(--gold);color:var(--ink);border:1px solid var(--gold)}
@@ -324,21 +324,27 @@ const DATA=[{"name":"Hacienda","homes":[{"a":"9934 Chavaneaux Lndg","m":"JUL","c
 const SOLD=new Set(); // add addresses here (e.g. "9302 Ocotillo Rdg") to mark a home sold
 const CLOSED=0; // Number of homes closed so far
 const STATUS={
-  '4423 Danforth St':'PENDING',
-  '2343 Crisp Gln':'PENDING',
-  '2326 Crisp Gln':'PENDING',
+  '4423 Danforth St':'CONTRACT',
+  '2343 Crisp Gln':'CONTRACT',
+  '2326 Crisp Gln':'CONTRACT',
   '5522 Franklin Hills':'CONTRACT',
   '2529 Heritance Pass':'CONTRACT',
-  '9224 Ocotillo Rdg':'PENDING',
-  '8666 Rucker Pond Trail':'PENDING',
+  '9224 Ocotillo Rdg':'CONTRACT',
+  '8666 Rucker Pond Trail':'CONTRACT',
   '10639 Rosemont Pass':'CONTRACT',
   '10602 Rosemont Pass':'CONTRACT',
   '5511 Franklin Hills':'CONTRACT',
   '5518 Franklin Hills':'CONTRACT',
-  '5510 Franklin Hills':'PENDING',
+  '5510 Franklin Hills':'CONTRACT',
   '9228 Ocotillo Rdg':'PENDING',
   '15435 Lonehollow Lake':'PENDING',
-  '12420 Spike Heights':'PENDING'
+  '12420 Spike Heights':'PENDING',
+  '9954 Chavaneaux Lndg':'PENDING',
+  '4236 Clarisse Street':'PENDING',
+  '9946 Chavaneaux Lndg':'PENDING',
+  '9947 Chavaneaux Lndg':'PENDING',
+  '2338 Crisp Gln':'PENDING',
+  '5523 Franklin Hills':'CONTRACT'
 };
 const AGENT_MAP={
   '4423 Danforth St':'Jason Giuca',
@@ -355,7 +361,13 @@ const AGENT_MAP={
   '5510 Franklin Hills':'Jose Ochoa',
   '9228 Ocotillo Rdg':'Jaime Rios',
   '15435 Lonehollow Lake':'Isaac Munoz',
-  '12420 Spike Heights':'Torey Bailey'
+  '12420 Spike Heights':'Torey Bailey',
+  '9954 Chavaneaux Lndg':'Jose Ochoa',
+  '4236 Clarisse Street':'Enrique Cavazos Jr',
+  '9946 Chavaneaux Lndg':'Abdiel Serrano',
+  '9947 Chavaneaux Lndg':'Jose Ochoa',
+  '2338 Crisp Gln':'Anthony Luna',
+  '5523 Franklin Hills':'Isaac Munoz'
 };
 const END=new Date(2026,11,31,23,59,59), START=new Date(2026,9,1);
 let month='ALL';
@@ -472,7 +484,7 @@ const agentStats=Array.from(allAgents).map(agent=>{
     }
   });
   return {agent,pending,contract,closed,total:pending+contract+closed};
-}).sort((a,b)=>(b.contract+b.closed)-(a.contract+a.closed));
+}).sort((a,b)=>(b.total-a.total)||((b.closed+b.contract)-(a.closed+a.contract))||a.agent.localeCompare(b.agent));
 const podium=document.getElementById('podium-board');
 agentStats.forEach(s=>{
   const item=document.createElement('div');
