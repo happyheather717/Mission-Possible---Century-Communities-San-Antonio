@@ -203,18 +203,18 @@ li.sold .tag{background:var(--ink);border-color:var(--ink);color:var(--gold)}
     <div style="font-size:11px;font-weight:600;display:grid;grid-template-columns:1.5fr 1.5fr 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);color:var(--mute)">
      <div>Address | Community</div>
      <div>Agent</div>
-     <div text-align:right>Date of Closing</div>
+     <div text-align:right>Closing Month</div>
     </div>
-    <div class="placeholder" style="padding:20px 0">Sales will appear as homes close</div>
+    <div id="sales-lb"><div class="placeholder" style="padding:20px 0">Sales will appear as homes close</div></div>
    </div>
    <div class="lb">
     <h3>Construction Leaderboard</h3>
     <div style="font-size:11px;font-weight:600;display:grid;grid-template-columns:1.5fr 1.5fr 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);color:var(--mute)">
      <div>Address | Community</div>
      <div>Builder</div>
-     <div text-align:right>Date of Closing</div>
+     <div text-align:right>Closing Month</div>
     </div>
-    <div class="placeholder" style="padding:20px 0">Homes will appear as they close</div>
+    <div id="construction-lb"><div class="placeholder" style="padding:20px 0">Homes will appear as they close</div></div>
    </div>
   </div>
  </section>
@@ -224,11 +224,11 @@ li.sold .tag{background:var(--ink);border-color:var(--ink);color:var(--gold)}
   <div class="leaderboards">
    <div class="lb">
     <h3>Sales MVPs</h3>
-    <div class="placeholder">MVPs will be determined as homes close</div>
+    <div id="sales-mvp"><div class="placeholder">MVPs will be determined as homes close</div></div>
    </div>
    <div class="lb">
     <h3>Construction MVPs</h3>
-    <div class="placeholder">MVPs will be determined as homes close</div>
+    <div id="construction-mvp"><div class="placeholder">MVPs will be determined as homes close</div></div>
    </div>
   </div>
  </section>
@@ -237,10 +237,10 @@ li.sold .tag{background:var(--ink);border-color:var(--ink);color:var(--gold)}
   <h2>Company-Wide Sales</h2>
   <div class="company-wide">
    <h3>Sales Summary</h3>
-   <div class="stat-row"><span class="stat-label">Total Homes Closed</span><span class="stat-value">0</span></div>
-   <div class="stat-row"><span class="stat-label">Total Homes In Contest</span><span class="stat-value">111</span></div>
-   <div class="stat-row"><span class="stat-label">Homes Remaining</span><span class="stat-value">111</span></div>
-   <div class="stat-row"><span class="stat-label">Competition Leaders</span><span class="stat-value">—</span></div>
+   <div class="stat-row"><span class="stat-label">Total Homes Closed</span><span class="stat-value" id="sum-closed">0</span></div>
+   <div class="stat-row"><span class="stat-label">Total Homes In Contest</span><span class="stat-value" id="sum-total">111</span></div>
+   <div class="stat-row"><span class="stat-label">Homes Remaining</span><span class="stat-value" id="sum-left">111</span></div>
+   <div class="stat-row"><span class="stat-label">Competition Leaders</span><span class="stat-value" id="sum-leaders" style="text-align:right">—</span></div>
   </div>
  </section>
 
@@ -326,9 +326,9 @@ const CLOSED=0; // Number of homes closed so far
 const STATUS={
   '4423 Danforth St':'CONTRACT',
   '2343 Crisp Gln':'CONTRACT',
-  '2326 Crisp Gln':'CONTRACT',
+  '2326 Crisp Gln':'CLOSED',
   '5522 Franklin Hills':'CONTRACT',
-  '2529 Heritance Pass':'CONTRACT',
+  '2529 Heritance Pass':'CLOSED',
   '9224 Ocotillo Rdg':'CONTRACT',
   '8666 Rucker Pond Trail':'CONTRACT',
   '10639 Rosemont Pass':'CONTRACT',
@@ -336,15 +336,13 @@ const STATUS={
   '5511 Franklin Hills':'CONTRACT',
   '5518 Franklin Hills':'CONTRACT',
   '5510 Franklin Hills':'CONTRACT',
-  '9228 Ocotillo Rdg':'PENDING',
   '15435 Lonehollow Lake':'PENDING',
-  '12420 Spike Heights':'PENDING',
-  '9954 Chavaneaux Lndg':'PENDING',
+  '9954 Chavaneaux Lndg':'CONTRACT',
   '4236 Clarisse Street':'CONTRACT',
   '9946 Chavaneaux Lndg':'CONTRACT',
   '9947 Chavaneaux Lndg':'CONTRACT',
   '2338 Crisp Gln':'CONTRACT',
-  '5523 Franklin Hills':'CONTRACT',
+  '5523 Franklin Hills':'CLOSED',
   '9966 Chavaneaux Lndg':'CONTRACT',
   '7387 Teal Trace':'CONTRACT',
   '9962 Chavaneaux Lndg':'PENDING',
@@ -371,9 +369,7 @@ const AGENT_MAP={
   '5511 Franklin Hills':'Arleth Estrada',
   '5518 Franklin Hills':'Jaime Rios',
   '5510 Franklin Hills':'Jose Ochoa',
-  '9228 Ocotillo Rdg':'Jaime Rios',
   '15435 Lonehollow Lake':'Isaac Munoz',
-  '12420 Spike Heights':'Torey Bailey',
   '9954 Chavaneaux Lndg':'Jose Ochoa',
   '4236 Clarisse Street':'Enrique Cavazos Jr',
   '9946 Chavaneaux Lndg':'Abdiel Serrano',
@@ -513,7 +509,7 @@ const podium=document.getElementById('podium-board');
 agentStats.forEach(s=>{
   const item=document.createElement('div');
   item.className='team-item';
-  item.innerHTML='<div class="team-item-name">'+esc(s.agent)+'</div><div style="font-size:12px;color:var(--mute);margin:6px 0"><span style="color:var(--lav)">● Pending: '+s.pending+'</span> <span style="color:var(--gold);margin-left:8px">● Contract: '+s.contract+'</span></div><div style="font-size:11px;color:var(--mute)">Total: '+s.total+' homes</div>';
+  item.innerHTML='<div class="team-item-name">'+esc(s.agent)+'</div><div style="font-size:12px;color:var(--mute);margin:6px 0"><span style="color:var(--lav)">● Pending: '+s.pending+'</span> <span style="color:var(--gold);margin-left:8px">● Contract: '+s.contract+'</span> <span style="color:var(--teal);margin-left:8px">● Closed: '+s.closed+'</span></div><div style="font-size:11px;color:var(--mute)">Total: '+s.total+' homes</div>';
   podium.appendChild(item);
 });
 // Populate recent sales (CONTRACT status)
@@ -548,8 +544,36 @@ DATA_MERGED.forEach(c=>{
   const item=document.createElement('div');
   item.className='team-item';
   item.innerHTML='<div class="team-item-name">'+esc(c.name)+'</div><div style="font-size:12px;color:var(--mute);margin:6px 0"><span style="color:var(--lav)">● Pending: '+pending+'</span> <span style="color:var(--gold);margin-left:8px">● Contract: '+contract+'</span></div><div style="font-size:11px;color:var(--mute)">Total: '+c.homes.length+' homes</div>';
-  board.appendChild(item);
+  if(board)board.appendChild(item);
 });
+// Leaderboards + company-wide summary (driven by STATUS / AGENT_MAP)
+(function(){
+  const closedHomes=[];
+  DATA_MERGED.forEach(c=>c.homes.forEach(h=>{
+    if(STATUS[h.a]==='CLOSED')closedHomes.push({addr:h.a,comm:c.name,agent:AGENT_MAP[h.a]||'TBD',cm:CMS[c.name]||CMS[h.a]||'TBD',date:'October'});
+  }));
+  const row=(a,b,c)=>'<div style="display:grid;grid-template-columns:1.5fr 1.5fr 1fr;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px"><div>'+esc(a)+'</div><div>'+esc(b)+'</div><div style="text-align:right;color:var(--gold);font-weight:600">'+esc(c)+'</div></div>';
+  const sl=document.getElementById('sales-lb'),cl=document.getElementById('construction-lb');
+  if(closedHomes.length){
+    sl.innerHTML=closedHomes.map(h=>row(h.addr+' | '+h.comm,h.agent,h.date)).join('');
+    cl.innerHTML=closedHomes.map(h=>row(h.addr+' | '+h.comm,h.cm,h.date)).join('');
+  }
+  const mvp=(id,key)=>{
+    const t={};closedHomes.forEach(h=>t[h[key]]=(t[h[key]]||0)+1);
+    const list=Object.entries(t).sort((x,y)=>(y[1]-x[1])||x[0].localeCompare(y[0])).slice(0,3);
+    if(!list.length)return;
+    document.getElementById(id).innerHTML=list.map(([n,c])=>'<div class="lb-item"><div class="lb-name" style="padding-left:0">'+esc(n)+'</div><div class="lb-value">'+c+' closed</div></div>').join('');
+  };
+  mvp('sales-mvp','agent');mvp('construction-mvp','cm');
+  const total=DATA_MERGED.reduce((n,c)=>n+c.homes.length,0);
+  document.getElementById('sum-closed').textContent=closedHomes.length;
+  document.getElementById('sum-total').textContent=total;
+  document.getElementById('sum-left').textContent=total-closedHomes.length;
+  const counts={};closedHomes.forEach(h=>counts[h.agent]=(counts[h.agent]||0)+1);
+  const max=Math.max(0,...Object.values(counts));
+  const leaders=Object.keys(counts).filter(a=>counts[a]===max).sort();
+  document.getElementById('sum-leaders').textContent=max?leaders.join(', ')+' ('+max+' closed)':'\u2014';
+})();
 </script>
 
 </body></html>
