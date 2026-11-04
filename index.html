@@ -68,6 +68,7 @@ li{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid v
 li.sold{background:var(--gold);color:var(--ink);border-radius:6px;padding-inline:8px;margin-block:2px;border-top-color:transparent;font-weight:600}
 li.sold .addr{text-decoration:line-through}
 li.sold .tag{background:var(--ink);border-color:var(--ink);color:var(--gold)}
+li.sold .status{background:var(--ink);border-color:var(--ink);color:var(--gold)}
 .foot{color:var(--mute);font-size:12px}
 .section{margin-top:32px}
 .section h2{font-family:var(--display);font-size:24px;text-transform:uppercase;letter-spacing:.02em;margin:0 0 16px}
@@ -336,7 +337,7 @@ const STATUS={
   '5511 Franklin Hills':'CONTRACT',
   '5518 Franklin Hills':'CONTRACT',
   '5510 Franklin Hills':'CONTRACT',
-  '15435 Lonehollow Lake':'PENDING',
+  '15435 Lonehollow Lake':'CONTRACT',
   '9954 Chavaneaux Lndg':'CONTRACT',
   '4236 Clarisse Street':'CONTRACT',
   '9946 Chavaneaux Lndg':'CONTRACT',
@@ -346,7 +347,7 @@ const STATUS={
   '9966 Chavaneaux Lndg':'CONTRACT',
   '7387 Teal Trace':'CONTRACT',
   '9943 Chavaneaux Lndg':'CONTRACT',
-  '10602 Rosemont Hill':'PENDING',
+  '10602 Rosemont Hill':'CONTRACT',
   '9962 Chavaneaux Lndg':'CONTRACT',
   '2334 Crisp Gln':'CONTRACT',
   '2520 Heritance Pass':'CONTRACT',
@@ -359,9 +360,8 @@ const STATUS={
   '8922 Wildwood Pass':'CONTRACT',
   '8650 Rucker Pond Trail':'PENDING',
   '9971 Chavaneaux Lndg':'CONTRACT',
-  '2114 Tb Place':'PENDING',
   '8412 Rocket View':'CONTRACT',
-  '4212 Clarisse Street':'PENDING'
+  '4212 Clarisse Street':'CONTRACT'
 };
 const AGENT_MAP={
   '4423 Danforth St':'Jason Giuca',
@@ -399,8 +399,8 @@ const AGENT_MAP={
   '8922 Wildwood Pass':'Zaid Nawayseh',
   '8650 Rucker Pond Trail':'Zaid Nawayseh',
   '9971 Chavaneaux Lndg':'Brenda Herrera',
-  '2114 Tb Place':'Andres Martinez',
-  '8412 Rocket View':'Arleth Estrada'
+  '8412 Rocket View':'Arleth Estrada',
+  '4212 Clarisse Street':'Jason Giuca'
 };
 const END=new Date(2026,11,31,23,59,59), START=new Date(2026,9,1);
 let month='ALL';
@@ -476,11 +476,14 @@ function render(){
     const hs=c.homes.filter(h=>month==='ALL'||h.m===month);
     if(!hs.length)return;
     const sold=hs.filter(h=>SOLD.has(h.a)).length;
+    const closedN=hs.filter(h=>STATUS[h.a]==='CLOSED'||SOLD.has(h.a)).length;
+    const soldN=hs.filter(h=>STATUS[h.a]==='CONTRACT'||STATUS[h.a]==='CLOSED'||SOLD.has(h.a)).length;
+    const untilTarget=hs.length-soldN, leftToClose=hs.length-closedN;
     const d=document.createElement('section');d.className='card';
     const cm=CMS[c.name]||'TBD';
     const agents=(SALES[c.name]||[]).join(', ')||'TBD';
-    d.innerHTML='<h3>'+esc(c.name)+'</h3><p class="cnt">CM: <span style="color:var(--gold);font-weight:600">'+esc(cm)+'</span></p><p class="cnt">Sales: <span style="color:var(--teal);font-weight:600">'+esc(agents)+'</span></p><p class="cnt">Sales Until Target Met: <span style="color:var(--teal);font-weight:600">'+hs.length+'</span></p><p class="cnt">'+hs.length+' qualifying home'+(hs.length>1?'s':'')+(sold?' &middot; '+sold+' sold':'')+'</p><ul>'+
-      hs.map(h=>{const st=STATUS[h.a];const agent=AGENT_MAP[h.a]||'';return '<li'+(SOLD.has(h.a)?' class="sold"':'')+'><span class="tag '+h.m.toLowerCase()+'">'+h.m+'</span><span class="addr">'+esc(h.a)+'</span>'+(st?'<span class="status '+st.toLowerCase()+'">'+st+(agent?' · '+esc(agent):'')+'</span>':'')+'</li>';}).join('')+'</ul>';
+    d.innerHTML='<h3>'+esc(c.name)+'</h3><p class="cnt">CM: <span style="color:var(--gold);font-weight:600">'+esc(cm)+'</span></p><p class="cnt">Sales: <span style="color:var(--teal);font-weight:600">'+esc(agents)+'</span></p><p class="cnt">Sales Until Target Met: <span style="color:var(--teal);font-weight:600">'+untilTarget+'</span></p><p class="cnt">'+leftToClose+' home'+(leftToClose===1?'':'s')+' left to close</p><ul>'+
+      hs.map(h=>{const st=STATUS[h.a];const agent=AGENT_MAP[h.a]||'';return '<li'+(SOLD.has(h.a)||st==='CLOSED'?' class="sold"':'')+'><span class="tag '+h.m.toLowerCase()+'">'+h.m+'</span><span class="addr">'+esc(h.a)+'</span>'+(st?'<span class="status '+st.toLowerCase()+'">'+st+(agent?' · '+esc(agent):'')+'</span>':'')+'</li>';}).join('')+'</ul>';
     g.appendChild(d);
   });
 }
