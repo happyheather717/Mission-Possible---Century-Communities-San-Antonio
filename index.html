@@ -325,17 +325,14 @@ const DATA=[{"name":"Hacienda","homes":[{"a":"9934 Chavaneaux Lndg","m":"JUL","c
 const SOLD=new Set(); // add addresses here (e.g. "9302 Ocotillo Rdg") to mark a home sold
 const CLOSED=0; // Number of homes closed so far
 const STATUS={
-  '4423 Danforth St':'CONTRACT',
   '2343 Crisp Gln':'CLOSED',
   '2326 Crisp Gln':'CLOSED',
-  '5522 Franklin Hills':'CONTRACT',
+  '5522 Franklin Hills':'CLOSED',
   '2529 Heritance Pass':'CLOSED',
   '9224 Ocotillo Rdg':'CONTRACT',
-  '8666 Rucker Pond Trail':'CONTRACT',
   '10639 Rosemont Pass':'CLOSED',
   '10602 Rosemont Pass':'CLOSED',
   '5511 Franklin Hills':'CONTRACT',
-  '5518 Franklin Hills':'CONTRACT',
   '5510 Franklin Hills':'CONTRACT',
   '15435 Lonehollow Lake':'CONTRACT',
   '9954 Chavaneaux Lndg':'CONTRACT',
@@ -360,30 +357,27 @@ const STATUS={
   '8922 Wildwood Pass':'CONTRACT',
   '8650 Rucker Pond Trail':'CONTRACT',
   '9971 Chavaneaux Lndg':'CONTRACT',
-  '8412 Rocket View':'CONTRACT',
   '4212 Clarisse Street':'CONTRACT',
   '9950 Chavaneaux Lndg':'CONTRACT',
-  '5515 Franklin Hills':'PENDING',
+  '5515 Franklin Hills':'CONTRACT',
   '9216 Ocotillo Rdg':'PENDING',
   '9228 Ocotillo Rdg':'PENDING',
-  '9302 Ocotillo Rdg':'PENDING',
-  '9974 Chavaneaux Lndg':'PENDING',
+  '9974 Chavaneaux Lndg':'CONTRACT',
   '8713 Rucker Pond Trail':'PENDING',
-  '8719 Rucker Pond Trail':'PENDING',
-  '5531 Franklin Hills':'CONTRACT'
+  '8719 Rucker Pond Trail':'CONTRACT',
+  '5531 Franklin Hills':'CONTRACT',
+  '9212 Ocotillo Rdg':'PENDING',
+  '5518 Franklin Hills':'PENDING'
 };
 const AGENT_MAP={
-  '4423 Danforth St':'Jason Giuca',
   '2343 Crisp Gln':'Brenda Herrera',
   '2326 Crisp Gln':'Cesario Gutierrez',
   '5522 Franklin Hills':'Torey Bailey',
   '2529 Heritance Pass':'Brenda Herrera',
   '9224 Ocotillo Rdg':'Jose Ochoa',
-  '8666 Rucker Pond Trail':'Jose Ochoa',
   '10639 Rosemont Pass':'Claudia Ramos',
   '10602 Rosemont Pass':'Zaid Nawayseh',
   '5511 Franklin Hills':'Arleth Estrada',
-  '5518 Franklin Hills':'Jaime Rios',
   '5510 Franklin Hills':'Jose Ochoa',
   '15435 Lonehollow Lake':'Isaac Munoz',
   '9954 Chavaneaux Lndg':'Jose Ochoa',
@@ -408,17 +402,16 @@ const AGENT_MAP={
   '8922 Wildwood Pass':'Zaid Nawayseh',
   '8650 Rucker Pond Trail':'Zaid Nawayseh',
   '9971 Chavaneaux Lndg':'Brenda Herrera',
-  '8412 Rocket View':'Arleth Estrada',
   '4212 Clarisse Street':'Jason Giuca',
   '5515 Franklin Hills':'Paulina Pena',
   '9216 Ocotillo Rdg':'Isaac Munoz',
   '9228 Ocotillo Rdg':'Jose Ochoa',
-  '9302 Ocotillo Rdg':'Jose Ochoa',
   '9974 Chavaneaux Lndg':'Isaac Munoz',
   '8713 Rucker Pond Trail':'Juan Calderon',
   '8719 Rucker Pond Trail':'Isaac Munoz',
   '9950 Chavaneaux Lndg':'Isaac Munoz',
-  '5531 Franklin Hills':'Brenda Herrera'
+  '5531 Franklin Hills':'Brenda Herrera',
+  '9212 Ocotillo Rdg':'Anthony Luna'
 };
 const END=new Date(2026,11,31,23,59,59), START=new Date(2026,9,1);
 let month='ALL';
