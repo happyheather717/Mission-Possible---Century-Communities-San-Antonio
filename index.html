@@ -360,10 +360,10 @@ const STATUS={
   '9947 Chavaneaux Lndg':'CLOSED',
   '2338 Crisp Gln':'CLOSED',
   '5523 Franklin Hills':'CLOSED',
-  '9966 Chavaneaux Lndg':'CONTRACT',
+  '9966 Chavaneaux Lndg':'CLOSED',
   '7387 Teal Trace':'CONTRACT',
   '9943 Chavaneaux Lndg':'CONTRACT',
-  '10602 Rosemont Hill':'CONTRACT',
+  '10602 Rosemont Hill':'CLOSED',
   '9962 Chavaneaux Lndg':'CONTRACT',
   '2334 Crisp Gln':'CONTRACT',
   '8350 Rocket View':'CONTRACT',
@@ -376,20 +376,22 @@ const STATUS={
   '4212 Clarisse Street':'CONTRACT',
   '9950 Chavaneaux Lndg':'CONTRACT',
   '5515 Franklin Hills':'CONTRACT',
-  '9216 Ocotillo Rdg':'PENDING',
+  '9216 Ocotillo Rdg':'CONTRACT',
   '9228 Ocotillo Rdg':'CONTRACT',
   '9974 Chavaneaux Lndg':'CONTRACT',
   '8713 Rucker Pond Trail':'PENDING',
   '8719 Rucker Pond Trail':'CONTRACT',
   '5531 Franklin Hills':'CONTRACT',
   '9212 Ocotillo Rdg':'CONTRACT',
-  '9983 Chavaneaux Lndg':'PENDING',
-  '2323 Crisp Gln':'PENDING',
-  '8432 Rocket View':'PENDING',
+  '9983 Chavaneaux Lndg':'CONTRACT',
+  '2323 Crisp Gln':'CONTRACT',
+  '8432 Rocket View':'CONTRACT',
   '5502 Franklin Hills':'PENDING',
-  '8666 Rucker Pond Trail':'PENDING',
+  '8666 Rucker Pond Trail':'CONTRACT',
   '4228 Clarisse Street':'PENDING',
-  '2114 Tb Place':'PENDING'
+  '2114 Tb Place':'CONTRACT',
+  '6566 Bufflehead Bend':'PENDING',
+  '2520 Heritance Pass':'PENDING'
 };
 const AGENT_MAP={
   '2343 Crisp Gln':'Brenda Herrera',
@@ -437,7 +439,9 @@ const AGENT_MAP={
   '5502 Franklin Hills':'Enrique Cavazos Jr',
   '8666 Rucker Pond Trail':'Anthony Luna',
   '4228 Clarisse Street':'Kassidy Kowalski',
-  '2114 Tb Place':'Torey Bailey'
+  '2114 Tb Place':'Torey Bailey',
+  '6566 Bufflehead Bend':'Isaac Munoz',
+  '2520 Heritance Pass':'Jaime Rios'
 };
 const END=new Date(2026,11,31,23,59,59), START=new Date(2026,9,1);
 let month='ALL';
@@ -613,10 +617,11 @@ DATA_MERGED.forEach(c=>{
     cl.innerHTML=closedHomes.map(h=>row(h.addr+' | '+h.comm,h.cm,h.date)).join('');
   }
   const mvp=(id,key)=>{
-    const t={};closedHomes.forEach(h=>t[h[key]]=(t[h[key]]||0)+1);
+    const act=[];DATA_MERGED.forEach(c=>c.homes.forEach(h=>{const st=STATUS[h.a];if(st==='PENDING'||st==='CONTRACT'||st==='CLOSED')act.push({agent:AGENT_MAP[h.a]||'TBD',cm:CMS[c.name]||'TBD'});}));
+    const t={};act.forEach(h=>t[h[key]]=(t[h[key]]||0)+1);
     const list=Object.entries(t).sort((x,y)=>(y[1]-x[1])||x[0].localeCompare(y[0])).slice(0,3);
     if(!list.length)return;
-    document.getElementById(id).innerHTML=list.map(([n,c])=>'<div class="lb-item"><div class="lb-name" style="padding-left:0">'+esc(n)+'</div><div class="lb-value">'+c+' closed</div></div>').join('');
+    document.getElementById(id).innerHTML=list.map(([n,c])=>'<div class="lb-item"><div class="lb-name" style="padding-left:0">'+esc(n)+'</div><div class="lb-value">'+c+' homes</div></div>').join('');
   };
   mvp('sales-mvp','agent');mvp('construction-mvp','cm');
   const total=DATA_MERGED.reduce((n,c)=>n+c.homes.length,0);
